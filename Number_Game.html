@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Угадай число, Оксаночка</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      input {
+        margin: 10px 0;
+        padding: 5px;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #keyboard {
+        position: fixed;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        grid-auto-rows: 100px;
+        gap: 5px;
+        z-index: 9999;
+      }
+
+      .key {
+        padding: 0;
+        width: 100px;
+        height: 100px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        font-size: 24px;
+      }
+
+      .key:hover {
+        background-color: #e0e0e0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Угадай число, Оксаночка.</h1>
+      <h2>Очень азартная игра</h2>
+      <p id="message"></p>
+      <p id="range">Диапазон чисел: от 0 до 0</p>
+      <p id="attempts">Осталось попыток: tryCount</p>
+      <p id="score">Очки: 0</p>
+      <p id="secretNumber" style="display: none"></p>
+      <div id="inputFields">
+        <input type="text" class="user-input" />
+      </div>
+      <button id="enterInputButton">Угадай!</button><br />
+      <p>Каждое угаданное число даёт одно очко, малыш. И добавляет 3 попыки.</p>
+      <p>
+        После того как число угадано, диапазон загаданных чисел увеличивается на
+        1.<br />
+      </p>
+      <button id="buyInputButton">Купить окно ввода</button><br />
+      <p>
+        Открывает еще одно ввода значения. При этом попытка всегда будет
+        использована одна. Негативный эффект - увеличивает диапазон возможных
+        значений на 2.
+      </p>
+
+      <button id="buyInputButton5">Купить окно ввода за 5 попыток</button><br />
+      <p>
+        Также открывает дополнительно окно ввода значений. Но отнимает за это 5
+        попыток.
+      </p>
+      <button id="buyHintButton">Купить подсказку</button><br />
+      <p>За 1 очко уменьшает диапазон значений в два раза.</p>
+    </div>
+    <div id="keyboard">
+      <button class="key">1</button>
+      <button class="key">2</button>
+      <button class="key">3</button>
+      <button class="key">4</button>
+      <button class="key">5</button>
+      <button class="key">6</button>
+      <button class="key">7</button>
+      <button class="key">8</button>
+      <button class="key">9</button>
+      <button class="key">0</button>
+    </div>
+    <script>
+      let counter = 0;
+      let userNumbers = [];
+      let tryCount = 8;
+      let score = 0;
+      let inputFieldsContainer = document.getElementById("inputFields");
+      let buyButton = document.getElementById("buyInputButton");
+      let buyButton5 = document.getElementById("buyInputButton5");
+      let buyHintButton = document.getElementById("buyHintButton");
+
+      let message = document.getElementById("message");
+      let range = document.getElementById("range");
+      let attempts = document.getElementById("attempts");
+      let scoreDisplay = document.getElementById("score");
+      let secretNumberDisplay = document.getElementById("secretNumber");
+      let enterButton = document.getElementById("enterInputButton");
+
+      range.textContent = "Угадайте число в диапазоне: от 0 до " + counter;
+      attempts.textContent = "У вас осталось попыток: " + tryCount;
+      scoreDisplay.textContent = "Очки: " + score;
+
+      enterButton.addEventListener("click", function () {
+        let secretNumber = Math.floor(Math.random() * counter);
+        secretNumberDisplay.textContent =
+          "Загаданное число было: " + secretNumber;
+
+        let allInputs = document.querySelectorAll(".user-input");
+        let correctGuess = false;
+
+        allInputs.forEach((input) => {
+          let userNumber = parseInt(input.value);
+          userNumbers.push(userNumber);
+          if (userNumber === secretNumber) {
+            correctGuess = true;
+          }
+        });
+
+        if (correctGuess) {
+          counter++;
+          tryCount += 3;
+          score++;
+          message.textContent =
+            "Поздравляем! Вы угадали число: " + secretNumber;
+        } else {
+          tryCount--;
+          message.textContent =
+            "Вы не угадали. Правильный ответ был: " +
+            secretNumber +
+            ". У вас осталось " +
+            tryCount +
+            " попыток.";
+        }
+
+        if (tryCount === 0) {
+          message.textContent =
+            "Игра окончена. Вы набрали " + score + " очков.";
+          enterButton.disabled = true;
+        }
+
+        range.textContent = "Диапазон чисел: от 0 до " + counter;
+        attempts.textContent = "Осталось попыток: " + tryCount;
+        scoreDisplay.textContent = "Очки: " + score;
+
+        allInputs.forEach((input) => {
+          input.value = "";
+        });
+      });
+
+      buyButton.addEventListener("click", function () {
+        let newInput = document.createElement("input");
+        newInput.setAttribute("type", "text");
+        newInput.classList.add("user-input");
+        inputFieldsContainer.appendChild(newInput);
+        counter += 2;
+        range.textContent = "Диапазон чисел: от 0 до " + counter;
+      });
+
+      buyButton5.addEventListener("click", function () {
+        if (tryCount >= 5) {
+          let newInput = document.createElement("input");
+          newInput.setAttribute("type", "text");
+          newInput.classList.add("user-input");
+          inputFieldsContainer.appendChild(newInput);
+          tryCount -= 5;
+          attempts.textContent = "Осталось попыток: " + tryCount;
+        } else {
+          message.textContent =
+            "У вас недостаточно попыток для покупки окна ввода.";
+        }
+      });
+
+      buyHintButton.addEventListener("click", function () {
+        if (score >= 2) {
+          counter = Math.floor(counter / 3);
+          score -= 2;
+          range.textContent = "Диапазон чисел: от 0 до " + counter;
+          scoreDisplay.textContent = "Очки: " + score;
+        } else if (score >= 1) {
+          counter = Math.floor(counter / 2);
+          score--;
+          range.textContent = "Диапазон чисел: от 0 до " + counter;
+          scoreDisplay.textContent = "Очки: " + score;
+        } else {
+          message.textContent =
+            "У вас недостаточно очков для покупки подсказки.";
+        }
+      });
+      const keys = document.querySelectorAll(".key");
+      const inputFields = document.querySelectorAll(".user-input");
+
+      keys.forEach((key) => {
+        key.addEventListener("click", () => {
+          const value = key.textContent;
+          inputFields.forEach((input) => {
+            if (input.value.length < 1) {
+              input.value += value;
+              return;
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
